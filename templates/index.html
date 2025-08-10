@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏛️ Court Data Fetcher</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #f39c12;
+            --danger-color: #e74c3c;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .main-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            max-width: 1200px;
+        }
+        
+        .header-section {
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 20px 20px 0 0;
+            text-align: center;
+        }
+        
+        .search-form {
+            padding: 2rem;
+            background: white;
+            border-radius: 15px;
+            margin: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+        
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 12px 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color) 0%, #2980b9 100%);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 30px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .case-result {
+            background: white;
+            border-radius: 15px;
+            margin: 1rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            display: none;
+        }
+        
+        .case-header {
+            background: linear-gradient(135deg, var(--success-color) 0%, #229954 100%);
+            color: white;
+            padding: 1.5rem;
+        }
+        
+        .case-details {
+            padding: 2rem;
+        }
+        
+        .detail-card {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--secondary-color);
+        }
+        
+        .order-item {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .order-item:hover {
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+        }
+        
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+            border-width: 0.3rem;
+        }
+        
+        .alert {
+            border-radius: 10px;
+            border: none;
+            padding: 1rem 1.5rem;
+        }
+        
+        .alert-info {
+            background: linear-gradient(135deg, #d1ecf1 0%, #bee5eb 100%);
+            color: #0c5460;
+        }
+        
+        .alert-danger {
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+            color: #721c24;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 2rem;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 768px) {
+            .main-container {
+                margin: 1rem;
+                border-radius: 15px;
+            }
+            
+            .header-section {
+                padding: 1.5rem;
+                border-radius: 15px 15px 0 0;
+            }
+            
+            .search-form, .case-details {
+                padding: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="main-container">
+            <!-- Header Section -->
+            <div class="header-section">
+                <h1 class="display-4 mb-3">
+                    <i class="fas fa-gavel me-3"></i>
+                    Court Data Fetcher
+                </h1>
+                <p class="lead mb-0">Search for case information from Delhi High Court</p>
+                <div class="mt-3">
+                    <span class="badge bg-warning text-dark px-3 py-2">
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                        Currently showing demo data due to CAPTCHA protection
+                    </span>
+                </div>
+            </div>
+
+            <!-- Search Form -->
+            <div class="search-form">
+                <form id="searchForm">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="caseType" class="form-label">
+                                <i class="fas fa-list me-1"></i>Case Type
+                            </label>
+                            <select class="form-control" id="caseType" name="case_type" required>
+                                <option value="">Select Case Type</option>
+                                {% for code, name in case_types.items() %}
+                                <option value="{{ code }}">{{ code }} - {{ name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="caseNumber" class="form-label">
+                                <i class="fas fa-hashtag me-1"></i>Case Number
+                            </label>
+                            <input type="text" class="form-control" id="caseNumber" 
+                                   name="case_number" placeholder="e.g., 12345" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="filingYear" class="form-label">
+                                <i class="fas fa-calendar me-1"></i>Filing Year
+                            </label>
+                            <input type="text" class="form-control" id="filingYear" 
+                                   name="filing_year" placeholder="e.g., 2023" required 
+                                   pattern="[0-9]{4}" maxlength="4">
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-search me-2"></i>Search Case
+                        </button>
+                        <a href="/history" class="btn btn-outline-secondary btn-lg ms-2">
+                            <i class="fas fa-history me-2"></i>View History
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Animation -->
+            <div class="loading" id="loadingDiv">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-3">
+                    <h5>Searching court records...</h5>
+                    <p class="text-muted">This may take a few moments</p>
+                </div>
+            </div>
+
+            <!-- Error Alert -->
+            <div class="alert alert-danger d-none" id="errorAlert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span id="errorMessage"></span>
+            </div>
+
+            <!-- Info Alert -->
+            <div class="alert alert-info">
+                <h6><i class="fas fa-info-circle me-2"></i>Important Information</h6>
+                <ul class="mb-0">
+                    <li>This application currently shows demo data due to CAPTCHA protection on court websites</li>
+                    <li>For real data, visit <a href="https://delhihighcourt.nic.in/app/get-case-type-status" target="_blank" class="alert-link">Delhi High Court</a> manually</li>
+                    <li>All searches are logged for debugging and improvement purposes</li>
+                </ul>
+            </div>
+
+            <!-- Case Results -->
+            <div class="case-result" id="caseResult">
+                <div class="case-header">
+                    <h3 id="caseTitle">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Case Information
+                    </h3>
+                    <div class="mt-2">
+                        <span class="badge bg-light text-dark" id="sourceInfo"></span>
+                    </div>
+                </div>
+                
+                <div class="case-details">
+                    <!-- Case Basic Info -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-users me-1"></i>Petitioner</h6>
+                                <p class="mb-0" id="petitionerName">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-user-tie me-1"></i>Respondent</h6>
+                                <p class="mb-0" id="respondentName">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-calendar-plus me-1"></i>Filing Date</h6>
+                                <p class="mb-0" id="filingDate">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-calendar-check me-1"></i>Next Hearing</h6>
+                                <p class="mb-0" id="nextHearing">-</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="detail-card">
+                                <h6><i class="fas fa-info-circle me-1"></i>Status</h6>
+                                <p class="mb-0" id="caseStatus">-</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Orders Section -->
+                    <h5 class="mb-3">
+                        <i class="fas fa-scroll me-2"></i>Court Orders & Judgments
+                    </h5>
+                    <div id="ordersContainer">
+                        <!-- Orders will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="footer">
+                <p class="mb-2">
+                    <i class="fas fa-code me-1"></i>
+                    Built with Flask, Selenium & Bootstrap
+                </p>
+                <p class="small mb-0">
+                    <i class="fas fa-balance-scale me-1"></i>
+                    For educational and research purposes only. Respect court website terms of service.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('searchForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const searchData = {
+                case_type: formData.get('case_type'),
+                case_number: formData.get('case_number'),
+                filing_year: formData.get('filing_year')
+            };
+            
+            // Show loading
+            document.getElementById('loadingDiv').style.display = 'block';
+            document.getElementById('caseResult').style.display = 'none';
+            document.getElementById('errorAlert').classList.add('d-none');
+            
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(searchData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    displayCaseResult(result.data, result.source, result.explanation);
+                } else {
+                    showError(result.error);
+                }
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+            } finally {
+                document.getElementById('loadingDiv').style.display = 'none';
+            }
+        });
+        
+        function displayCaseResult(data, source, explanation) {
+            // Populate case details
+            document.getElementById('caseTitle').textContent = data.case_number || 'Case Information';
+            document.getElementById('sourceInfo').textContent = source === 'mock_data' ? 'Demo Data' : 'Live Data';
+            
+            document.getElementById('petitionerName').textContent = data.parties?.petitioner || 'N/A';
+            document.getElementById('respondentName').textContent = data.parties?.respondent || 'N/A';
+            document.getElementById('filingDate').textContent = data.filing_date || 'N/A';
+            document.getElementById('nextHearing').textContent = data.next_hearing_date || 'N/A';
+            document.getElementById('caseStatus').textContent = data.case_status || 'N/A';
+            
+            // Populate orders
+            const ordersContainer = document.getElementById('ordersContainer');
+            ordersContainer.innerHTML = '';
+            
+            if (data.orders && data.orders.length > 0) {
+                data.orders.forEach(order => {
+                    const orderDiv = document.createElement('div');
+                    orderDiv.className = 'order-item';
+                    orderDiv.innerHTML = `
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <h6 class="mb-2">
+                                    <i class="fas fa-file-pdf me-1 text-danger"></i>
+                                    ${order.order_type} - ${order.date}
+                                </h6>
+                                <p class="mb-2">${order.description}</p>
+                            </div>
+                            <div>
+                                ${order.pdf_link ? 
+                                    `<a href="/download/${order.pdf_link}" class="btn btn-sm btn-outline-primary">
+                                        <i class="fas fa-download me-1"></i>Download
+                                    </a>` : 
+                                    '<span class="text-muted">No PDF</span>'
+                                }
+                            </div>
+                        </div>
+                    `;
+                    ordersContainer.appendChild(orderDiv);
+                });
+            } else {
+                ordersContainer.innerHTML = '<p class="text-muted">No orders found for this case.</p>';
+            }
+            
+            // Show explanation for mock data
+            if (explanation) {
+                const explanationDiv = document.createElement('div');
+                explanationDiv.className = 'alert alert-info mt-3';
+                explanationDiv.innerHTML = `
+                    <h6><i class="fas fa-lightbulb me-1"></i>Why Demo Data?</h6>
+                    <p>${explanation.why_mock}</p>
+                    <details>
+                        <summary>Manual Access Steps</summary>
+                        <ol class="mt-2 mb-0">
+                            ${explanation.manual_steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </details>
+                `;
+                ordersContainer.appendChild(explanationDiv);
+            }
+            
+            document.getElementById('caseResult').style.display = 'block';
+        }
+        
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('errorAlert').classList.remove('d-none');
+        }
+        
+        // Auto-fill current year
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearInput = document.getElementById('filingYear');
+            const currentYear = new Date().getFullYear();
+            yearInput.placeholder = `e.g., ${currentYear}`;
+        });
+        
+        // Input validation
+        document.getElementById('filingYear').addEventListener('input', function(e) {
+            let value = e.target.value.replace(/[^0-9]/g, '');
+            if (value.length > 4) value = value.slice(0, 4);
+            e.target.value = value;
+        });
+        
+        document.getElementById('caseNumber').addEventListener('input', function(e) {
+            // Allow alphanumeric for case numbers
+            let value = e.target.value.replace(/[^a-zA-Z0-9]/g, '');
+            e.target.value = value;
+        });
+    </script>
+</body>
+</html>

@@ -18,12 +18,11 @@ RUN apt-get update && apt-get install -y \
     curl \
     xvfb \
     xsel \
-    unzip \
     libnss3 \
     libgconf-2-4 \
     libxss1 \
-    libappindicator1 \
-    libindicator7 \
+    libayatana-appindicator1 \
+    libayatana-indicator7 \
     gconf-service \
     libasound2 \
     libatk1.0-0 \
@@ -56,11 +55,9 @@ RUN apt-get update && apt-get install -y \
     libxtst6 \
     ca-certificates \
     fonts-liberation \
-    libappindicator1 \
-    libnss3 \
     lsb-release \
     xdg-utils \
-    && rm -rf /var/lib/apt/lists/*
+ && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome
 RUN wget -q -O - https://dl-ssl.google.com/linux/linux_signing_key.pub | apt-key add - \

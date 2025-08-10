@@ -10,7 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies (including SQLite support)
 RUN apt-get update && apt-get install -y \
     wget \
     gnupg \
@@ -22,7 +22,6 @@ RUN apt-get update && apt-get install -y \
     libgconf-2-4 \
     libxss1 \
     libayatana-appindicator1 \
-    libayatana-indicator7 \
     gconf-service \
     libasound2 \
     libatk1.0-0 \
@@ -57,6 +56,8 @@ RUN apt-get update && apt-get install -y \
     fonts-liberation \
     lsb-release \
     xdg-utils \
+    sqlite3 \
+    libsqlite3-dev \
  && rm -rf /var/lib/apt/lists/*
 
 # Install Google Chrome

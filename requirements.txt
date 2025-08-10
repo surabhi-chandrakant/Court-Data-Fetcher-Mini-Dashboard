@@ -8,9 +8,6 @@ beautifulsoup4==4.12.2
 requests==2.31.0
 lxml==4.9.3
 
-# Database
-sqlite3  # Built into Python
-
 # Environment & Configuration
 python-dotenv==1.0.0
 
@@ -19,9 +16,6 @@ fake-useragent==1.4.0
 
 # HTML Parsing
 html5lib==1.1
-
-# File Handling
-secure-filename  # Part of Werkzeug
 
 # Development Dependencies (uncomment for dev environment)
 # pytest==7.4.2
